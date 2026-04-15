@@ -80,17 +80,22 @@ def create_app():
     user = os.getenv('DB_USER')
     password = os.getenv('DB_PASSWORD')
     host = os.getenv('DB_HOST')
-    port = os.getenv('DB_PORT')
+    port = os.getenv('DB_PORT', '5432') # Default-ku waa 5432 haddaan la helin
     db_name = os.getenv('DB_NAME')
 
-    # Kaliya samee quote_plus haddii password-ka la helay
     if password:
         safe_password = urllib.parse.quote_plus(password)
     else:
         safe_password = ""
 
-    # Hubi in magaca config-ga uu sax yahay (Dhammaan waa xarfo waaweyn)
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{user}:{safe_password}@{host}:{port}/{db_name}"
+    # Dhisidda URI-ga
+    # Hubi in dhammaan variables-ka la helay
+    if all([user, host, db_name]):
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{user}:{safe_password}@{host}:{port}/{db_name}"
+    else:
+        # Tani waa haddii aad rabto inaad SQLite u isticmaasho si ku meel gaar ah (laakiin Vercel kuma habboona)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fallback.db'
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
