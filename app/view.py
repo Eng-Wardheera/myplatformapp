@@ -6,6 +6,8 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional, U
 # -------------------------------
 # 1. Register Form
 # -------------------------------
+from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
+
 class RegisterForm(FlaskForm):
     fullname = StringField("Full Name", validators=[DataRequired()])
     username = StringField("Username", validators=[DataRequired()])
@@ -16,11 +18,20 @@ class RegisterForm(FlaskForm):
         DataRequired(), 
         Length(min=6, max=150)
     ])
-    confirm_password = PasswordField("Confirm Password", validators=[DataRequired()])
+
+    confirm_password = PasswordField("Confirm Password", validators=[
+        DataRequired(),
+        EqualTo('password', message='Passwords must match')
+    ])
     
-    receiveMail = BooleanField("Receive Emails", validators=[Optional()]) # BooleanField badanaa Optional ayaa la dhigaa
+    receiveMail = BooleanField("Receive Emails", validators=[Optional()])
+    
+    # ❌ HALKAN AYAA PROBLEM KA JIRA
+    # DataRequired ma shaqeyso checkbox si sax ah
     termsCondition = BooleanField("Terms & Conditions", validators=[DataRequired()])
+    
     submit = SubmitField("Create Account")
+
 
 # -------------------------------
 # 2. Login Form

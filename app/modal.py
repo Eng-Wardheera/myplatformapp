@@ -342,3 +342,6 @@ class SettingsData(db.Model):
         return f"<SettingsData {self.id} - {self.group_name}>"
 
 
+
+
+

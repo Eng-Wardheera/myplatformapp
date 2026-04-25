@@ -126,54 +126,88 @@
 
             <div class="divider"><span>or register with email</span></div>
 
-            <form method="POST" action="{{ url_for('main.register') }}">
-                {{ form.hidden_tag() }}
+          <form method="POST" action="{{ url_for('main.register') }}">
+    {{ form.hidden_tag() }}
 
-                <div id="step-1">
-                    <div class="mb-3">
-                        <label class="form-label">Full Name</label>
-                        {{ form.fullname(class_='form-control', placeholder='E.g. Ahmed Ali') }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email Address</label>
-                        {{ form.email(class_='form-control', placeholder='name@company.com') }}
-                    </div>
-                    <button type="button" class="btn-mongo" onclick="nextStep()">Next</button>
-                </div>
+    <!-- STEP 1 -->
+    <div id="step-1">
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            {{ form.fullname(class_='form-control', placeholder='E.g. Ahmed Ali') }}
+            {% for error in form.fullname.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
 
-                <div id="step-2" style="display: none;">
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        {{ form.username(class_='form-control') }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <div class="password-wrapper">
-                            {{ form.password(class_='form-control password', id='reg_pass') }}
-                            <i class="feather-eye toggle-password" onclick="togglePass('reg_pass', this)"></i>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Confirm Password</label>
-                        <div class="password-wrapper">
-                            {{ form.confirm_password(class_='form-control', id='confirm_pass') }}
-                            <i class="feather-eye toggle-password" onclick="togglePass('confirm_pass', this)"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="form-check mb-3">
-                        {{ form.termsCondition(class_='form-check-input', id='terms') }}
-                        <label class="form-check-label text-muted small" for="terms">
-                            I agree to the Terms & Conditions
-                        </label>
-                    </div>
+        <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            {{ form.email(class_='form-control', placeholder='name@company.com') }}
+            {% for error in form.email.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
 
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light w-50" onclick="prevStep()">Back</button>
-                        {{ form.submit(class_='btn-mongo w-50 mt-0') }}
-                    </div>
-                </div>
-            </form>
+        <!-- ✅ IMPORTANT -->
+        <div class="mb-3">
+            <label class="form-label">Phone</label>
+            {{ form.phone(class_='form-control', placeholder='2526xxxxxxx') }}
+            {% for error in form.phone.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="btn-mongo" onclick="nextStep()">Next</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step-2" style="display: none;">
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            {{ form.username(class_='form-control') }}
+            {% for error in form.username.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <div class="password-wrapper">
+                {{ form.password(class_='form-control', id='reg_pass') }}
+                <i class="feather-eye toggle-password" onclick="togglePass('reg_pass', this)"></i>
+            </div>
+            {% for error in form.password.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <div class="password-wrapper">
+                {{ form.confirm_password(class_='form-control', id='confirm_pass') }}
+                <i class="feather-eye toggle-password" onclick="togglePass('confirm_pass', this)"></i>
+            </div>
+            {% for error in form.confirm_password.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.termsCondition(class_='form-check-input', id='terms') }}
+            <label class="form-check-label text-muted small" for="terms">
+                I agree to the Terms & Conditions
+            </label>
+            {% for error in form.termsCondition.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-light w-50" onclick="prevStep()">Back</button>
+            {{ form.submit(class_='btn-mongo w-50 mt-0') }}
+        </div>
+    </div>
+</form>
+
         </div>
 
         <div class="auth-right">
@@ -194,30 +228,39 @@
     <script src="{{ url_for('static', filename='backend/assets/vendors/js/vendors.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        function nextStep() {
-            document.getElementById('step-1').style.display = 'none';
-            document.getElementById('step-2').style.display = 'block';
-        }
-        function prevStep() {
-            document.getElementById('step-2').style.display = 'none';
-            document.getElementById('step-1').style.display = 'block';
-        }
+<script>
+function nextStep() {
+    const fullname = document.querySelector('[name="fullname"]').value.trim();
+    const email = document.querySelector('[name="email"]').value.trim();
+    const phone = document.querySelector('[name="phone"]').value.trim();
 
-        // Show/Hide Password Toggle Logic
-        function togglePass(inputId, icon) {
-            const input = document.getElementById(inputId);
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.replace('feather-eye', 'feather-eye-off');
-            } else {
-                input.type = "password";
-                icon.classList.replace('feather-eye-off', 'feather-eye');
-            }
-        }
+    if (!fullname || !email || !phone) {
+        alert("Please fill all required fields (Full Name, Email, Phone)");
+        return;
+    }
 
-      
-    </script>
+    document.getElementById('step-1').style.display = 'none';
+    document.getElementById('step-2').style.display = 'block';
+}
+
+function prevStep() {
+    document.getElementById('step-2').style.display = 'none';
+    document.getElementById('step-1').style.display = 'block';
+}
+
+// Show/Hide Password
+function togglePass(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace('feather-eye', 'feather-eye-off');
+    } else {
+        input.type = "password";
+        icon.classList.replace('feather-eye-off', 'feather-eye');
+    }
+}
+</script>
+
 
       <!-- SweetAlert2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

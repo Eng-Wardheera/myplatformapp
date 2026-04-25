@@ -52,7 +52,7 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from io import BytesIO
 from app import csrf
-from app.modal import SettingsData, User, UserLog, UserSession
+from app.modal import SettingsData, User, UserLog, UserRole, UserSession
 from app.view import LoginForm, RegisterForm, SettingsDataForm   
 
 
@@ -230,7 +230,7 @@ def index():
     settings = SettingsData.query.first()
 
     # **Pass the form to the template**
-    return render_template("frontend/index.html",  settings=settings,)
+    return render_template("frontend/home/index.html",  settings=settings,)
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -377,10 +377,12 @@ def register():
         password = form.password.data
         confirm_password = form.confirm_password.data
 
+        # Password check
         if password != confirm_password:
             flash("Passwords do not match", "danger")
             return redirect(url_for("main.register"))
 
+        # Check existing user
         existing_user = User.query.filter(
             (User.username == username) |
             (User.email == email) |
@@ -391,14 +393,21 @@ def register():
             flash("Username, email or phone already exists", "danger")
             return redirect(url_for("main.register"))
 
+        # Create user (IMPORTANT FIXES HERE)
         user = User(
             fullname=fullname,
             username=username,
             email=email,
             phone=phone,
             password=generate_password_hash(password),
-            role="user",
-            status=0
+
+            # ✅ saxan
+            role=UserRole.user,
+
+            # haddii aad rabto inaad role table isticmaasho:
+            # role_id = 1  # (ama query ka keen)
+
+            status=True
         )
 
         db.session.add(user)
@@ -407,10 +416,7 @@ def register():
         flash("Account created successfully. Please login!", "success")
         return redirect(url_for("main.login"))
 
-    # ✅ Halkan waa muhiim: ku soo dir 'form' template-ka
     return render_template("backend/auth/auth-register.html", form=form)
-
-
 
 
 

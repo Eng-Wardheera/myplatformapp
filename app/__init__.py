@@ -76,21 +76,28 @@ def create_app():
    
     csrf.init_app(app)  # ✅ INIT
 
-    # Ka soo akhri link-ga Neon ee aad Vercel gelisay
-    database_url = os.getenv('DATABASE_URL')
+    # Configuration
+    user = os.getenv('DB_USER')
+    password = os.getenv('DB_PASSWORD')
+    host = os.getenv('DB_HOST')
+    port = os.getenv('DB_PORT', '5432') # Default-ku waa 5432 haddaan la helin
+    db_name = os.getenv('DB_NAME')
 
-    if database_url:
-        # Tani waxay saxaysaa haddii link-gu ku bilaawdo postgres:// (oo Vercel badanaa keento)
-        if database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql://", 1)
-        
-        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    if password:
+        safe_password = urllib.parse.quote_plus(password)
     else:
-        # Haddii link-ga la waayo, wuxuu isticmaalayaa SQLite local ahaan
+        safe_password = ""
+
+    # Dhisidda URI-ga
+    # Hubi in dhammaan variables-ka la helay
+    if all([user, host, db_name]):
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{user}:{safe_password}@{host}:{port}/{db_name}"
+    else:
+        # Tani waa haddii aad rabto inaad SQLite u isticmaasho si ku meel gaar ah (laakiin Vercel kuma habboona)
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fallback.db'
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-   
+
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
     # create_app() dhexdiisa
     app.config['DEBUG'] = False
